@@ -29,9 +29,9 @@ namespace ParallelTasks
             p.Execute();
         }
 
-        public void Progress(int priority)
+        public void Progress(int value)
         {
-            progressBar1.Value = priority + 1;
+            progressBar1.Value += value;
         }
 
         public void Log(string text)

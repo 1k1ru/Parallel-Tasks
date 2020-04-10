@@ -31,9 +31,9 @@
             this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.t = new System.Windows.Forms.Timer(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // button1
@@ -49,21 +49,12 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(56, 266);
-            this.progressBar1.Maximum = 5;
+            this.progressBar1.Location = new System.Drawing.Point(12, 266);
+            this.progressBar1.Maximum = 9;
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(430, 50);
+            this.progressBar1.Size = new System.Drawing.Size(546, 50);
             this.progressBar1.Step = 1;
             this.progressBar1.TabIndex = 1;
-            // 
-            // panel1
-            // 
-            this.panel1.BackgroundImage = global::WindowsFormsApp2.Properties.Resources.scheme;
-            this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.panel1.Location = new System.Drawing.Point(12, 12);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(516, 248);
-            this.panel1.TabIndex = 3;
             // 
             // richTextBox1
             // 
@@ -79,6 +70,15 @@
             // 
             this.t.Interval = 1000;
             this.t.Tick += new System.EventHandler(this.t_Tick);
+            // 
+            // panel1
+            // 
+            this.panel1.BackgroundImage = global::WindowsFormsApp2.Properties.Resources.scheme;
+            this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.panel1.Location = new System.Drawing.Point(12, 12);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(546, 248);
+            this.panel1.TabIndex = 3;
             // 
             // Form1
             // 
@@ -100,10 +100,10 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Timer t;
+        public System.Windows.Forms.ProgressBar progressBar1;
+        public System.Windows.Forms.RichTextBox richTextBox1;
     }
 }
 
