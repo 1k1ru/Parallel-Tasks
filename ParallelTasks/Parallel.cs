@@ -25,8 +25,9 @@ namespace ParallelTasks
         private int resH;
         private int resK;
 
-        public delegate void TaskHandler(string s);
-        //private event TaskHandler TaskComplete;
+        public delegate void TaskHandler(string invoker);
+
+        public delegate void TaskStarting(string invoker, string startingTask);
 
         public Parallel(Form1 form, int n)
         {
@@ -35,8 +36,6 @@ namespace ParallelTasks
 
             tasks = new Dictionary<string, Task>();
             locker = new object();
-
-            //TaskComplete += Log;
         }
 
         public void Execute()
@@ -48,14 +47,26 @@ namespace ParallelTasks
             tasks.Add("B", Task.Run(B));
         }
 
-        public void Log(string invoker)
+        public void TaskStarted(string invoker)
         {
-            form.Log($"Task complete: {invoker}");
+            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task started: {invoker}");
+        }
+
+        public void TaskCompleted(string invoker)
+        {
+            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task completed: {invoker}");
             form.Progress(1);
+        }
+
+        public void TaskStartsNewTask(string invoker, string startingTask)
+        {
+            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task {invoker} started task {startingTask}");
         }
 
         public void A()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "A");
+
             M = new int[n, n];
             Random rand = new Random();
 
@@ -67,7 +78,7 @@ namespace ParallelTasks
                 }
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "A");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "A");
 
             lock (locker)
             {
@@ -76,6 +87,7 @@ namespace ParallelTasks
                     if (tasks["B"].IsCompleted)
                     {
                         tasks.Add("C", Task.Run(C));
+                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "A", "C");
                     }
                 }
                 catch (Exception e)
@@ -87,6 +99,8 @@ namespace ParallelTasks
 
         public void B()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "B");
+
             R = new bool[n];
             Random rand = new Random();
 
@@ -95,7 +109,7 @@ namespace ParallelTasks
                 R[i] = rand.Next(2) == 1;
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "B");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "B");
 
             lock (locker)
             {
@@ -104,6 +118,7 @@ namespace ParallelTasks
                     if (tasks["A"].IsCompleted)
                     {
                         tasks.Add("C", Task.Run(C));
+                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "B", "C");
                     }
                 }
                 catch (Exception e)
@@ -115,6 +130,8 @@ namespace ParallelTasks
 
         public void C()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "C");
+
             resC = new int[n, n];
             for (int i = 0; i < n; i++)
             {
@@ -128,15 +145,20 @@ namespace ParallelTasks
                 }
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "C");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "C");
 
             tasks.Add("D", Task.Run(D));
+            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "D");
             tasks.Add("E", Task.Run(E));
+            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "E");
             tasks.Add("F", Task.Run(F));
+            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "F");
         }
 
         public void D()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "D");
+
             resD = 0;
             foreach (var i in resC)
             {
@@ -144,13 +166,16 @@ namespace ParallelTasks
                 resD += i;
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "D");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "D");
 
             tasks.Add("G", Task.Run(G));
+            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "D", "G");
         }
 
         public void E()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "E");
+
             resE = 1;
             foreach (var i in resC)
             {
@@ -158,13 +183,16 @@ namespace ParallelTasks
                 resE *= i;
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "E");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "E");
 
             tasks.Add("H", Task.Run(H));
+            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "E", "H");
         }
 
         public void F()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "F");
+
             resE = 1;
             foreach (var i in resC)
             {
@@ -173,7 +201,7 @@ namespace ParallelTasks
                 resE -= 10 * i;
             }
 
-            form.BeginInvoke(new TaskHandler(Log), "F");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "F");
 
             lock (locker)
             {
@@ -182,6 +210,7 @@ namespace ParallelTasks
                     if (tasks["G"].IsCompleted && tasks["H"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
+                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "F", "K");
                     }
                 }
                 catch (Exception e)
@@ -193,10 +222,12 @@ namespace ParallelTasks
 
         public void G()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "G");
+
             //some func
             resG = resD * 2;
 
-            form.BeginInvoke(new TaskHandler(Log), "G");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "G");
 
             lock (locker)
             {
@@ -205,6 +236,7 @@ namespace ParallelTasks
                     if (tasks["F"].IsCompleted && tasks["H"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
+                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "G", "K");
                     }
                 }
                 catch (Exception e)
@@ -216,10 +248,12 @@ namespace ParallelTasks
 
         public void H()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "H");
+
             //some func
             resH = resE + 100;
 
-            form.BeginInvoke(new TaskHandler(Log), "H");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "H");
 
             lock (locker)
             {
@@ -228,6 +262,7 @@ namespace ParallelTasks
                     if (tasks["G"].IsCompleted && tasks["F"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
+                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "H", "K");
                     }
                 }
                 catch (Exception e)
@@ -239,10 +274,12 @@ namespace ParallelTasks
 
         public void K()
         {
+            form.BeginInvoke(new TaskHandler(TaskStarted), "K");
+
             //some func
             resK = resG + resH;
 
-            form.BeginInvoke(new TaskHandler(Log), "K");
+            form.BeginInvoke(new TaskHandler(TaskCompleted), "K");
         }
     }
 }

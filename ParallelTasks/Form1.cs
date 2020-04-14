@@ -44,5 +44,10 @@ namespace ParallelTasks
             t.Stop();
             button1.Enabled = true;
         }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

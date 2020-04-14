@@ -39,7 +39,7 @@
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button1.Location = new System.Drawing.Point(587, 266);
+            this.button1.Location = new System.Drawing.Point(638, 323);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(143, 50);
             this.button1.TabIndex = 0;
@@ -49,7 +49,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 266);
+            this.progressBar1.Location = new System.Drawing.Point(12, 323);
             this.progressBar1.Maximum = 9;
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(546, 50);
@@ -62,9 +62,10 @@
             this.richTextBox1.MaxLength = 10000;
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(184, 248);
+            this.richTextBox1.Size = new System.Drawing.Size(291, 304);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
+            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
             // 
             // t
             // 
@@ -77,20 +78,18 @@
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(546, 248);
+            this.panel1.Size = new System.Drawing.Size(546, 304);
             this.panel1.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(776, 328);
+            this.ClientSize = new System.Drawing.Size(867, 385);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button1);
-            this.MaximumSize = new System.Drawing.Size(792, 367);
-            this.MinimumSize = new System.Drawing.Size(792, 367);
             this.Name = "Form1";
             this.Text = "Parallel Tasks";
             this.ResumeLayout(false);
