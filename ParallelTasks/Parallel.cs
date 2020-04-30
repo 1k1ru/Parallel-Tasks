@@ -193,12 +193,12 @@ namespace ParallelTasks
         {
             form.BeginInvoke(new TaskHandler(TaskStarted), "F");
 
-            resE = 1;
+            resF = 1;
             foreach (var i in resC)
             {
                 //some func
-                resE *= i;
-                resE -= 10 * i;
+                resF *= i;
+                resF -= 10 * i;
             }
 
             form.BeginInvoke(new TaskHandler(TaskCompleted), "F");
