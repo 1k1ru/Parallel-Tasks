@@ -39,33 +39,34 @@
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.button1.Location = new System.Drawing.Point(638, 323);
+            this.button1.Location = new System.Drawing.Point(12, 259);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(143, 50);
+            this.button1.Size = new System.Drawing.Size(420, 49);
             this.button1.TabIndex = 0;
-            this.button1.Text = "Execute";
+            this.button1.Text = "ВЫПОЛНИТЬ";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 323);
+            this.progressBar1.Location = new System.Drawing.Point(12, 203);
             this.progressBar1.Maximum = 9;
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(546, 50);
+            this.progressBar1.Size = new System.Drawing.Size(420, 50);
             this.progressBar1.Step = 1;
             this.progressBar1.TabIndex = 1;
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(564, 12);
+            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.richTextBox1.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.richTextBox1.Location = new System.Drawing.Point(438, 0);
             this.richTextBox1.MaxLength = 10000;
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(291, 304);
+            this.richTextBox1.Size = new System.Drawing.Size(429, 320);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
-            this.richTextBox1.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
             // 
             // t
             // 
@@ -78,20 +79,20 @@
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.panel1.Location = new System.Drawing.Point(12, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(546, 304);
+            this.panel1.Size = new System.Drawing.Size(420, 185);
             this.panel1.TabIndex = 3;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(867, 385);
+            this.ClientSize = new System.Drawing.Size(867, 320);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button1);
             this.Name = "Form1";
-            this.Text = "Parallel Tasks";
+            this.Text = "Параллельное программирование процессов";
             this.ResumeLayout(false);
 
         }

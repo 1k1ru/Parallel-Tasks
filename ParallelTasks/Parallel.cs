@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -8,26 +9,26 @@ namespace ParallelTasks
 {
     public class Parallel
     {
-        private Form1 form;
-        private int n;
+        private Form1 form; //окно программы
+        private int n;      //некоторое число n - размеры обрабатываемых массивов данных
 
-        private Dictionary<string, Task> tasks;
-        private object locker;
+        private Dictionary<string, Task> tasks; //словарь запущенных/выполненных процессов
+        private object locker;                  //объект-заглушка для синхронизации доступа к словарю
 
-        private int[,] M;
-        private bool[] R;
+        private int[,] M;   //генерируемый массив M
+        private bool[] R;   //генерируемый массив R
 
-        private int[,] resC;
-        private int resD;
-        private int resE;
-        private int resF;
-        private int resG;
-        private int resH;
-        private int resK;
+        private int[] f1;   //результат функции C
+        private int f2;     //результат функции D
+        private int f3;     //результат функции E
+        private int f4;     //результат функции F
+        private int f5;     //результат функции G
+        private int f6;     //результат функции H
+        private int f7;     //результат функции K
 
-        public delegate void TaskHandler(string invoker);
+        public delegate void LogHandler(string message);
 
-        public delegate void TaskStarting(string invoker, string startingTask);
+        public delegate void ProgressHandler();
 
         public Parallel(Form1 form, int n)
         {
@@ -38,35 +39,109 @@ namespace ParallelTasks
             locker = new object();
         }
 
+        //запуск процессов
         public void Execute()
         {
             tasks.Clear();
-            form.progressBar1.Value = 0;
 
             tasks.Add("A", Task.Run(A));
             tasks.Add("B", Task.Run(B));
         }
 
-        public void TaskStarted(string invoker)
+        //логгирование 
+        public void Log(string message)
         {
-            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task started: {invoker}");
+            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: {message}");
         }
 
-        public void TaskCompleted(string invoker)
+        //сообщение о начале задачи
+        public void TaskStarted(string invoker)
         {
-            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task completed: {invoker}");
+            form.BeginInvoke(new LogHandler(Log), $"Task started: {invoker}");
+        }
+
+        //сообщение о выполнении задачи
+        public void TaskCompleted(string invoker, int result)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Task completed: {invoker}");
+            sb.Append($"Task result: {result}");
+
+            form.BeginInvoke(new LogHandler(Log), sb.ToString());
+            form.BeginInvoke(new ProgressHandler(Progress));
+        }
+
+        public void TaskCompleted(string invoker, int[] result)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Task completed: {invoker}");
+            sb.AppendLine("Task result:");
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                sb.Append(result[i] + " ");
+            }
+
+            form.BeginInvoke(new LogHandler(Log), sb.ToString());
+            form.BeginInvoke(new ProgressHandler(Progress));
+        }
+
+        public void TaskCompleted(string invoker, bool[] result)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Task completed: {invoker}");
+            sb.AppendLine("Task result:");
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                sb.Append(result[i] + " ");
+            }
+
+            form.BeginInvoke(new LogHandler(Log), sb.ToString());
+
+            form.BeginInvoke(new ProgressHandler(Progress));
+        }
+
+        public void TaskCompleted(string invoker, int[,] result)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Task completed: {invoker}");
+            sb.AppendLine("Task result:");
+
+
+            for (int i = 0; i < result.GetLength(0); i++)
+            {
+                for (int j = 0; j < result.GetLength(1); j++)
+                {
+                    sb.Append(result[i, j] + " ");
+                }
+
+                sb.AppendLine();
+            }
+
+            sb.Remove(sb.Length - 1, 1);
+
+            form.BeginInvoke(new LogHandler(Log), sb.ToString());
+            form.BeginInvoke(new ProgressHandler(Progress));
+        }
+
+        //увеличение значения ProgressBar
+        public void Progress()
+        {
             form.Progress(1);
         }
 
+        //сообщение о начале новой задачи с указанием имени задачи, которая ее запустила
         public void TaskStartsNewTask(string invoker, string startingTask)
         {
-            form.Log($"{DateTime.Now.Hour}:{DateTime.Now.Minute}:{DateTime.Now.Second}:{DateTime.Now.Millisecond}: Task {invoker} started task {startingTask}");
+            form.BeginInvoke(new LogHandler(Log), $"Task {invoker} started task {startingTask}");
         }
 
         public void A()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "A");
+            TaskStarted("A");
 
+            //генерация M
             M = new int[n, n];
             Random rand = new Random();
 
@@ -78,7 +153,7 @@ namespace ParallelTasks
                 }
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "A");
+            TaskCompleted("A", M);
 
             lock (locker)
             {
@@ -87,20 +162,18 @@ namespace ParallelTasks
                     if (tasks["B"].IsCompleted)
                     {
                         tasks.Add("C", Task.Run(C));
-                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "A", "C");
+                        TaskStartsNewTask("A", "C");
                     }
                 }
-                catch (Exception e)
-                {
-                    // ignored
-                }
+                catch (Exception) { }
             }
         }
 
         public void B()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "B");
+            TaskStarted("B");
 
+            //генерация R
             R = new bool[n];
             Random rand = new Random();
 
@@ -109,7 +182,7 @@ namespace ParallelTasks
                 R[i] = rand.Next(2) == 1;
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "B");
+            TaskCompleted("A", R);
 
             lock (locker)
             {
@@ -118,90 +191,88 @@ namespace ParallelTasks
                     if (tasks["A"].IsCompleted)
                     {
                         tasks.Add("C", Task.Run(C));
-                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "B", "C");
+                        TaskStartsNewTask("B", "C");
                     }
                 }
-                catch (Exception e)
-                {
-                    // ignored
-                }
+                catch (Exception) { }
             }
         }
 
         public void C()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "C");
+            TaskStarted("C");
 
-            resC = new int[n, n];
+            //некоторая функция f1
+            f1 = new int[n];
             for (int i = 0; i < n; i++)
             {
+                f1[i] = 0;
                 for (int j = 0; j < n; j++)
                 {
-                    //some func
                     if (R[i])
                     {
-                        resC[i, j] = M[i, j];
+                        f1[i] += M[i, j];
                     }
                 }
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "C");
+            TaskCompleted("C", f1);
 
             tasks.Add("D", Task.Run(D));
-            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "D");
+            TaskStartsNewTask("C", "D");
             tasks.Add("E", Task.Run(E));
-            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "E");
+            TaskStartsNewTask("C", "E");
             tasks.Add("F", Task.Run(F));
-            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "C", "F");
+            TaskStartsNewTask("C", "F");
         }
 
         public void D()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "D");
+            TaskStarted("D");
 
-            resD = 0;
-            foreach (var i in resC)
+            //некоторая функция f1
+            f2 = 0;
+            foreach (var i in f1)
             {
-                //some func
-                resD += i;
+                f2 += i;
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "D");
+            TaskCompleted("D", f2);
 
             tasks.Add("G", Task.Run(G));
-            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "D", "G");
+            TaskStartsNewTask("D", "G");
         }
 
         public void E()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "E");
+            TaskStarted("E");
 
-            resE = 1;
-            foreach (var i in resC)
+            //некоторая функция f1
+            f3 = 1;
+            foreach (var i in f1)
             {
-                //some func
-                resE *= i;
+                f3 *= i;
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "E");
+            TaskCompleted("E", f3);
 
             tasks.Add("H", Task.Run(H));
-            form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "E", "H");
+            TaskStartsNewTask("E", "H");
         }
 
         public void F()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "F");
+            TaskStarted("F");
 
-            resF = 1;
-            foreach (var i in resC)
+            //некоторая функция f1
+            f4 = 1;
+            foreach (var i in f1)
             {
-                //some func
-                resF *= i;
-                resF -= 10 * i;
+                f4 *= i;
+                f4 -= 10 * i;
             }
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "F");
+            TaskCompleted("F", f4);
 
             lock (locker)
             {
@@ -210,24 +281,21 @@ namespace ParallelTasks
                     if (tasks["G"].IsCompleted && tasks["H"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
-                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "F", "K");
+                        TaskStartsNewTask("F", "K");
                     }
                 }
-                catch (Exception e)
-                {
-                    //ignored
-                }
+                catch (Exception) { }
             }
         }
 
         public void G()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "G");
+            TaskStarted("G");
 
-            //some func
-            resG = resD * 2;
+            //некоторая функция f1
+            f5 = f2 * 2;
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "G");
+            TaskCompleted("G", f5);
 
             lock (locker)
             {
@@ -236,24 +304,21 @@ namespace ParallelTasks
                     if (tasks["F"].IsCompleted && tasks["H"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
-                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "G", "K");
+                        TaskStartsNewTask("G", "K");
                     }
                 }
-                catch (Exception e)
-                {
-                    //ignored
-                }
+                catch (Exception) { }
             }
         }
 
         public void H()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "H");
+            TaskStarted("H");
 
-            //some func
-            resH = resE + 100;
+            //некоторая функция f1
+            f6 = f3 + 100;
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "H");
+            TaskCompleted("H", f6);
 
             lock (locker)
             {
@@ -262,24 +327,21 @@ namespace ParallelTasks
                     if (tasks["G"].IsCompleted && tasks["F"].IsCompleted)
                     {
                         tasks.Add("K", Task.Run(K));
-                        form.BeginInvoke(new TaskStarting(TaskStartsNewTask), "H", "K");
+                        TaskStartsNewTask("H", "K");
                     }
                 }
-                catch (Exception e)
-                {
-                    //ignored
-                }
+                catch (Exception) { }
             }
         }
 
         public void K()
         {
-            form.BeginInvoke(new TaskHandler(TaskStarted), "K");
+            TaskStarted("K");
 
-            //some func
-            resK = resG + resH;
+            //некоторая функция f1
+            f7 = f5 + f6;
 
-            form.BeginInvoke(new TaskHandler(TaskCompleted), "K");
+            TaskCompleted("K", f7);
         }
     }
 }
