@@ -125,7 +125,7 @@ namespace ParallelTasks
             form.BeginInvoke(new ProgressHandler(Progress));
         }
 
-        //увеличение значения ProgressBar
+        //увеличение значения 
         public void Progress()
         {
             form.Progress(1);
